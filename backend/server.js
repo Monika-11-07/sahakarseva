@@ -8,6 +8,7 @@ const authRoutes = require("./src/routes/authRoutes");
 const workerRoutes = require("./src/routes/workerRoutes");
 const adminRoutes = require("./src/routes/adminRoutes");
 const locationRoutes = require("./src/routes/locationRoutes");
+const bookingRoutes = require("./src/routes/bookingRoutes");
 const app = express();
 
 // Middleware
@@ -18,6 +19,7 @@ app.use("/api/services", serviceRoutes);
 app.use("/api/workers", workerRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/location", locationRoutes);
+app.use("/api/bookings", bookingRoutes);
 // Test Route
 app.get("/api/health", (req, res) => {
   res.status(200).json({

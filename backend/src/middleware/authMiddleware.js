@@ -93,7 +93,7 @@ const authenticateToken = async (req, res, next) => {
 };
 
 const authorizeRoles = (...allowedRoles) => {
-  return (req, res, next) => {
+  return async (req, res, next) => {
     if (!req.user) {
       return res.status(401).json({
         success: false,
@@ -101,13 +101,35 @@ const authorizeRoles = (...allowedRoles) => {
       });
     }
 
-    const userRole = (req.user.role || "").toLowerCase().trim();
+    let userRole = (
+      req.user.role ||
+      req.user.user_metadata?.role ||
+      req.user.app_metadata?.role ||
+      ""
+    ).toLowerCase().trim();
+
     const normalizedAllowedRoles = allowedRoles.map((r) => r.toLowerCase().trim());
+
+    // Fallback: If verifying worker role and userRole is not worker, check workers table for user's profile
+    if (!normalizedAllowedRoles.includes(userRole) && normalizedAllowedRoles.includes("worker") && req.user.id) {
+      try {
+        const workerCheck = await pool.query(
+          "SELECT id FROM workers WHERE user_id = $1 OR id = $1",
+          [req.user.id]
+        );
+        if (workerCheck.rows.length > 0) {
+          userRole = "worker";
+          req.user.role = "worker";
+        }
+      } catch (err) {
+        console.error("Error checking workers table in authMiddleware:", err.message);
+      }
+    }
 
     if (!normalizedAllowedRoles.includes(userRole)) {
       return res.status(403).json({
         success: false,
-        message: "Forbidden: Access restricted to worker role",
+        message: `Forbidden: Access restricted to ${allowedRoles.join(", ")} role(s)`,
       });
     }
 
@@ -116,5 +138,6 @@ const authorizeRoles = (...allowedRoles) => {
 };
 
 const requireWorkerRole = authorizeRoles("worker");
+const requireCustomerRole = authorizeRoles("customer");
 
-module.exports = { authenticateToken, authorizeRoles, requireWorkerRole };
+module.exports = { authenticateToken, authorizeRoles, requireWorkerRole, requireCustomerRole };
