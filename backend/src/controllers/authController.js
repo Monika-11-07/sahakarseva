@@ -142,10 +142,29 @@ const register = async (req, res) => {
 
       const dbUser = dbResult.rows[0];
 
-      // 5. Return user id, email, role, and success message
+      // 5. Automatically sign in to generate JWT access_token
+      let accessToken = null;
+      let refreshToken = null;
+      try {
+        const loginRes = await supabase.auth.signInWithPassword({
+          email: trimmedEmail,
+          password: password,
+        });
+        if (loginRes.data && loginRes.data.session) {
+          accessToken = loginRes.data.session.access_token;
+          refreshToken = loginRes.data.session.refresh_token;
+        }
+      } catch (_loginErr) {
+        console.warn("Auto-login post registration notice:", _loginErr.message);
+      }
+
+      // 6. Return user details & tokens
       return res.status(201).json({
         success: true,
         message: "User registered successfully",
+        access_token: accessToken,
+        refresh_token: refreshToken,
+        token: accessToken,
         id: dbUser.id,
         email: dbUser.email,
         role: dbUser.role,

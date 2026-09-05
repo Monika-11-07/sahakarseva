@@ -1,0 +1,30 @@
+# Node.js dependencies
+node_modules/
+
+# Local environment variables and secrets
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Temporary uploaded files
+src/uploads/*
+!src/uploads/.gitkeep
+uploads/
+
+# Log files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+
+# IDE and Editor settings
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# System and OS files
+.DS_Store
+Thumbs.db

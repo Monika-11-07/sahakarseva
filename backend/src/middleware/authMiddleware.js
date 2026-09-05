@@ -137,7 +137,46 @@ const authorizeRoles = (...allowedRoles) => {
   };
 };
 
+const optionalAuthenticateToken = async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization || req.headers.Authorization;
+    if (!authHeader || typeof authHeader !== "string") {
+      return next();
+    }
+    const parts = authHeader.split(" ");
+    if (parts.length !== 2 || parts[0] !== "Bearer" || !parts[1].trim()) {
+      return next();
+    }
+    const token = parts[1].trim();
+    if (!token) {
+      return next();
+    }
+
+    const { data } = await supabase.auth.getUser(token);
+    if (data && data.user) {
+      req.user = {
+        id: data.user.id,
+        email: data.user.email,
+        full_name: data.user.user_metadata?.full_name || "",
+        phone: data.user.user_metadata?.phone || "",
+        role: data.user.user_metadata?.role || "",
+        app_metadata: data.user.app_metadata,
+        user_metadata: data.user.user_metadata,
+      };
+    }
+  } catch (_err) {
+    // Non-blocking for optional auth
+  }
+  return next();
+};
+
 const requireWorkerRole = authorizeRoles("worker");
 const requireCustomerRole = authorizeRoles("customer");
 
-module.exports = { authenticateToken, authorizeRoles, requireWorkerRole, requireCustomerRole };
+module.exports = {
+  authenticateToken,
+  optionalAuthenticateToken,
+  authorizeRoles,
+  requireWorkerRole,
+  requireCustomerRole,
+};

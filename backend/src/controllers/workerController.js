@@ -10,7 +10,7 @@ const { getNearbyWorkers: findNearbyWorkers } = require("../services/geoService"
 const registerProfile = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { skill, experience, cooperative_name, district, state, bio } = req.body;
+    const { skill, experience, cooperative_name, district, state, bio, latitude, longitude } = req.body;
 
     // 1. Validation
     if (!skill || typeof skill !== "string" || !skill.trim()) {
@@ -41,6 +41,8 @@ const registerProfile = async (req, res) => {
       [userId]
     );
 
+    let worker;
+
     if (existingWorker.rows.length > 0) {
       const updateResult = await pool.query(
         `UPDATE workers 
@@ -49,25 +51,31 @@ const registerProfile = async (req, res) => {
          RETURNING id, user_id, skill, experience, cooperative_name, district, state, bio, verification_status, rating, available, created_at`,
         [trimmedSkill, parsedExperience, trimmedCoop, trimmedDistrict, trimmedState, trimmedBio, userId]
       );
-
-      return res.status(200).json({
-        success: true,
-        message: "Worker profile updated successfully",
-        data: updateResult.rows[0],
-      });
+      worker = updateResult.rows[0];
+    } else {
+      // Insert new worker profile
+      const insertResult = await pool.query(
+        `INSERT INTO workers (user_id, skill, experience, cooperative_name, district, state, bio, verification_status, rating, available)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, 'PENDING', 0, true)
+         RETURNING id, user_id, skill, experience, cooperative_name, district, state, bio, verification_status, rating, available, created_at`,
+        [userId, trimmedSkill, parsedExperience, trimmedCoop, trimmedDistrict, trimmedState, trimmedBio]
+      );
+      worker = insertResult.rows[0];
     }
 
-    // 3. Insert new worker profile with defaults (verification_status = 'PENDING', rating = 0, available = true)
-    const insertResult = await pool.query(
-      `INSERT INTO workers (user_id, skill, experience, cooperative_name, district, state, bio, verification_status, rating, available)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, 'PENDING', 0, true)
-       RETURNING id, user_id, skill, experience, cooperative_name, district, state, bio, verification_status, rating, available, created_at`,
-      [userId, trimmedSkill, parsedExperience, trimmedCoop, trimmedDistrict, trimmedState, trimmedBio]
-    );
+    // 3. Save GPS location coordinates if provided during registration
+    if (latitude !== undefined && longitude !== undefined && latitude !== null && longitude !== null) {
+      const latNum = Number(latitude);
+      const lngNum = Number(longitude);
+      if (!isNaN(latNum) && !isNaN(lngNum) && latNum >= -90 && latNum <= 90 && lngNum >= -180 && lngNum <= 180) {
+        const { updateWorkerLocation } = require("../services/geoService");
+        await updateWorkerLocation(worker.id, latNum, lngNum).catch((err) =>
+          console.warn("Location save during registration notice:", err.message)
+        );
+      }
+    }
 
-    const worker = insertResult.rows[0];
-
-    return res.status(201).json({
+    return res.status(200).json({
       success: true,
       message: "Worker profile registered successfully",
       data: worker,
@@ -315,7 +323,7 @@ const getNearbyWorkers = async (req, res) => {
       });
     }
 
-    const radiusNum = radius !== undefined && radius !== null ? Number(radius) : 10; // Default 10km radius if not provided
+    const radiusNum = radius !== undefined && radius !== null ? Number(radius) : 15; // Default 15km radius if not provided
     if (isNaN(radiusNum) || radiusNum <= 0) {
       return res.status(400).json({
         success: false,

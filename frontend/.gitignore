@@ -1,0 +1,54 @@
+# Node.js dependencies
+node_modules/
+
+# Expo & Web build output
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Generated native build folders
+/ios
+/android
+.kotlin/
+
+# Keys, certificates, & credentials
+*.jks
+*.p8
+*.p12
+*.key
+*.pem
+*.mobileprovision
+*.orig.*
+
+# Metro cache
+.metro-health-check*
+
+# Environment and secrets
+.env
+.env.local
+.env*.local
+.env.production
+!.env.example
+
+# Debug and Logs
+*.log
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# IDE, Editor, & AI tool configs
+.vscode/
+.idea/
+.claude/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# TypeScript build info
+*.tsbuildinfo
+
+app-example

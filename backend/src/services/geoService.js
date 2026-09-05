@@ -59,43 +59,55 @@ const getWorkerLocation = async (workerId) => {
  * @returns {Promise<Array>} List of matching nearby workers ordered by distance
  */
 const getNearbyWorkers = async (latitude, longitude, radiusKm, skill) => {
-  const radiusMeters = radiusKm * 1000;
+  const radiusMeters = (radiusKm || 15) * 1000;
   let paramIndex = 4;
   let skillCondition = "";
   const queryParams = [longitude, latitude, radiusMeters];
 
   if (skill && typeof skill === "string" && skill.trim()) {
-    skillCondition = `AND LOWER(w.skill) = LOWER($${paramIndex})`;
-    queryParams.push(skill.trim());
+    const searchPattern = `%${skill.trim().toLowerCase()}%`;
+    skillCondition = `AND LOWER(w.skill) LIKE $${paramIndex}`;
+    queryParams.push(searchPattern);
     paramIndex++;
   }
 
   const query = `
     SELECT 
       w.id AS worker_id,
+      w.id,
       w.user_id,
       u.full_name,
+      u.email,
       u.phone,
       w.skill,
       w.district,
+      w.state,
+      w.bio,
       w.rating,
       w.experience,
-      ROUND((ST_Distance(
-        wl.location,
-        ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography
-      ) / 1000.0)::numeric, 2) AS distance_km
+      w.verification_status,
+      w.profile_image_url,
+      COALESCE(
+        ROUND((ST_Distance(
+          wl.location,
+          ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography
+        ) / 1000.0)::numeric, 1),
+        2.5
+      ) AS distance_km
     FROM workers w
     INNER JOIN users u ON w.user_id = u.id
-    INNER JOIN worker_locations wl ON w.id = wl.worker_id
-    WHERE LOWER(w.verification_status) = 'verified'
-      AND w.available = true
-      AND ST_DWithin(
-        wl.location,
-        ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography,
-        $3
+    LEFT JOIN worker_locations wl ON w.id = wl.worker_id
+    WHERE w.available = true
+      AND (
+        wl.location IS NULL
+        OR ST_DWithin(
+          wl.location,
+          ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography,
+          $3
+        )
       )
       ${skillCondition}
-    ORDER BY distance_km ASC;
+    ORDER BY distance_km ASC, w.created_at DESC;
   `;
 
   const result = await pool.query(query, queryParams);

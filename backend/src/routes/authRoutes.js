@@ -4,6 +4,7 @@ const { register, login, getProfile } = require("../controllers/authController")
 const { authenticateToken } = require("../middleware/authMiddleware");
 
 router.post("/register", register);
+router.post("/signup", register);
 router.post("/login", login);
 
 // Protected user profile routes

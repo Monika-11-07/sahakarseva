@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+backend/node_modules/
+
+# Expo and build output
+.expo/
+frontend/.expo/
+dist/
+web-build/
+frontend/ios/
+frontend/android/
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+frontend/.env
+backend/.env
+
+# Temporary upload files
+backend/src/uploads/*
+!backend/src/uploads/.gitkeep
+
+# Tooling, IDEs, and OS files
+.vscode/
+.idea/
+.claude/
+.DS_Store
+Thumbs.db
+*.log
+*.tsbuildinfo
+
+# Repository history archives
+.git-frontend-history/

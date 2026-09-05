@@ -1,0 +1,68 @@
+export const categories = [
+  { name: 'Cleaning', icon: 'brush', color: '#dce9f5' },
+  { name: 'Plumbing', icon: 'build', color: '#dcebd0' },
+  { name: 'Electrical', icon: 'flash', color: '#ffe6a7' },
+  { name: 'Appliance repair', icon: 'construct', color: '#d7efee' },
+  { name: 'Painting', icon: 'color-palette', color: '#f7dfd3' },
+  { name: 'Pest control', icon: 'bug', color: '#e5e1f2' },
+  { name: 'Carpentry', icon: 'hammer', color: '#f2e2c7' },
+];
+
+export const services = [
+  {
+    title: 'Full home cleaning',
+    category: 'Cleaning',
+    description: 'Detailed cleaning for kitchens, rooms and bathrooms.',
+    price: 'From ₹499',
+    rating: '4.9',
+    image: 'https://images.pexels.com/photos/4239031/pexels-photo-4239031.jpeg?auto=compress&cs=tinysrgb&w=900',
+  },
+  {
+    title: 'AC service and repair',
+    category: 'Appliance repair',
+    description: 'Keep every room cool with reliable AC experts.',
+    price: 'From ₹399',
+    rating: '4.8',
+    image: 'https://images.pexels.com/photos/4254168/pexels-photo-4254168.jpeg?auto=compress&cs=tinysrgb&w=900',
+  },
+  {
+    title: 'Plumber visit',
+    category: 'Plumbing',
+    description: 'Fix leaks, taps, pipes and fittings at home.',
+    price: 'From ₹149',
+    rating: '4.7',
+    image: 'https://images.pexels.com/photos/8486973/pexels-photo-8486973.jpeg?auto=compress&cs=tinysrgb&w=900',
+  },
+  {
+    title: 'Electrician at home',
+    category: 'Electrical',
+    description: 'Safe installation and repair for everyday electrical work.',
+    price: 'From ₹129',
+    rating: '4.8',
+    image: 'https://images.pexels.com/photos/8005368/pexels-photo-8005368.jpeg?auto=compress&cs=tinysrgb&w=900',
+  },
+  {
+    title: 'Wall painting service',
+    category: 'Painting',
+    description: 'Give your rooms a fresh finish with trained painters.',
+    price: 'From ₹999',
+    rating: '4.8',
+    image: 'https://images.pexels.com/photos/6474450/pexels-photo-6474450.jpeg?auto=compress&cs=tinysrgb&w=900',
+  },
+  {
+    title: 'Home pest control',
+    category: 'Pest control',
+    description: 'Targeted treatment for common household pests.',
+    price: 'From ₹599',
+    rating: '4.6',
+    image: 'https://images.pexels.com/photos/6195274/pexels-photo-6195274.jpeg?auto=compress&cs=tinysrgb&w=900',
+  },
+  {
+    title: 'Furniture assembly',
+    category: 'Carpentry',
+    description: 'Quick help with furniture, shelves and small repairs.',
+    price: 'From ₹199',
+    rating: '4.7',
+    image: 'https://images.pexels.com/photos/6474471/pexels-photo-6474471.jpeg?auto=compress&cs=tinysrgb&w=900',
+  },
+];
